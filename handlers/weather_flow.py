@@ -25,6 +25,11 @@ def handle_coordinates(lat: float, lon: float) -> str:
 
 
 def process_city_input(message: Message):
+    
+    if not message.text:
+        bot.send_message(message.chat.id, "❗ Пожалуйста, введите название города текстом.")
+        return
+    
     city_name = message.text.strip()
 
     if city_name == "📍 Отправить геолокацию":

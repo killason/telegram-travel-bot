@@ -32,3 +32,7 @@ def bot_start(message: Message):
 @bot.message_handler(content_types=["location"])
 def handle_geo(message: Message):
     process_location_input(message)
+
+@bot.message_handler(content_types=["text"])
+def handle_text_city(message: Message):
+    process_city_input(message)
