@@ -1,12 +1,13 @@
 from telebot import types
 from telebot.types import Message
 from loader import bot
-from handlers.weather_flow import process_city_input, process_location_input
+from services.geo_service import get_coordinates_by_city
+from services.weather_service import get_weather_by_coordinates
+from services.advice_service import get_ai_advice
 
 
 @bot.message_handler(commands=["start"])
 def bot_start(message: Message):
-    
     welcome_text = (
         f"👋 Привет, {message.from_user.full_name}! Я — твой Путешественник-Досугатор 🗺️\n\n"
         "Я помогу тебе:\n"
@@ -25,14 +26,44 @@ def bot_start(message: Message):
 
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup)
 
-        # Регистрируем следующий шаг, если пользователь введёт город вручную
-    bot.register_next_step_handler(message, process_city_input)
 
-    # Отдельный хендлер на геолокацию
+# ⛳ ОБРАБОТКА ГЕОЛОКАЦИИ
 @bot.message_handler(content_types=["location"])
-def handle_geo(message: Message):
-    process_location_input(message)
+def handle_location(message: Message):
+    if not message.location:
+        bot.send_message(message.chat.id, "❗ Геолокация не получена.")
+        return
 
-@bot.message_handler(content_types=["text"])
-def handle_text_city(message: Message):
-    process_city_input(message)
+    lat, lon = message.location.latitude, message.location.longitude
+
+    weather = get_weather_by_coordinates(lat, lon)
+    if not weather:
+        bot.send_message(message.chat.id, "❌ Не удалось получить погоду.")
+        return
+
+    advice = get_ai_advice(weather["description"])
+    response = f"🌤️ Погода: {weather['description']}, {weather['temperature']}°C\n\n💡 {advice}"
+    bot.send_message(message.chat.id, response)
+
+
+# ⛳ ОБРАБОТКА ТЕКСТА ГОРОДА
+@bot.message_handler(func=lambda msg: msg.text and not msg.text.startswith('/'))
+def handle_city(message: Message):
+    city = message.text.strip()
+    bot.send_message(message.chat.id, f"🔍 Ищу информацию по городу: {city}")
+
+    coords = get_coordinates_by_city(city)
+    if not coords:
+        bot.send_message(message.chat.id, "❌ Не удалось найти город. Попробуйте снова.")
+        return
+
+    lat, lon = coords
+    weather = get_weather_by_coordinates(lat, lon)
+    if not weather:
+        bot.send_message(message.chat.id, "❌ Не удалось получить погоду.")
+        return
+
+    advice = get_ai_advice(weather["description"])
+    response = f"🌤️ Погода: {weather['description']}, {weather['temperature']}°C\n\n💡 {advice}"
+    bot.send_message(message.chat.id, response)
+    
