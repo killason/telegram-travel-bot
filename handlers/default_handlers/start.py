@@ -64,6 +64,14 @@ def handle_city(message: Message):
         return
 
     advice = get_ai_advice(weather["description"])
-    response = f"🌤️ Погода: {weather['description']}, {weather['temperature']}°C\n\n💡 {advice}"
+    
+    response = (
+        f"📍 Погода в {weather['city']}, {weather['country']}:\n"
+        f"🌡 Температура: {weather['temperature']}°C (ощущается как {weather['feels_like']}°C)\n"
+        f"🌥 Условия: {weather['condition']}\n"
+        f"💨 Ветер: {weather['wind']} км/ч\n"
+        f"💧 Влажность: {weather['humidity']}%\n\n"
+        f"💡 Совет: {advice}"
+    )
     bot.send_message(message.chat.id, response)
     
