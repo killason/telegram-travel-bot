@@ -1,6 +1,7 @@
 from telebot import types
 from telebot.types import Message
 from loader import bot
+from handlers.weather_flow import process_city_input
 
 
 @bot.message_handler(commands=["start"])
@@ -23,3 +24,6 @@ def bot_start(message: Message):
     markup.add(geo_button)
 
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup)
+
+        # Регистрируем следующий шаг, если пользователь введёт город вручную
+    bot.register_next_step_handler(message, process_city_input)
