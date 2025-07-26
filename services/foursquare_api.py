@@ -2,7 +2,9 @@ import os
 import requests
 from dotenv import load_dotenv
 
-load_dotenv()
+# Подгружаем .env только если он реально существует
+if os.path.exists(".env"):
+    load_dotenv()
 
 FSQ_API_KEY = os.getenv("FOURSQUARE_API_KEY")
 print(FSQ_API_KEY)
