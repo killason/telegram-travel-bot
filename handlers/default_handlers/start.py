@@ -14,12 +14,12 @@ def bot_start(message: Message):
         "• Получить идеи для прогулок, кафе, музеев и не только 🎭\n"
         "• Составить план досуга по настроению 🧘‍♂️\n\n"
         "📍 Давай начнём с выбора твоего местоположения:\n"
-        "Можешь отправить геолокацию или ввести город вручную 👇"
+        "• 🔘 Нажми кнопку ниже, чтобы отправить геолокацию\n"
+        "• 📝 Или просто напиши название города вручную"
     )
 
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
     geo_button = types.KeyboardButton("📍 Отправить геолокацию", request_location=True)
-    manual_button = types.KeyboardButton("✏️ Ввести город вручную")
-    markup.add(geo_button, manual_button)
+    markup.add(geo_button)
 
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup)
