@@ -4,7 +4,7 @@ import openai  # если используешь OpenAI
 
 openai.api_key = os.getenv("GROQ_API_KEY")
 
-def get_weather_advice(city: str, condition: str, temp_c: float) -> str:
+def get_ai_advice(city: str, condition: str, temp_c: float) -> str:
     prompt = (
         f"Ты — дружелюбный помощник по досугу.\n"
         f"Сейчас пользователь находится в городе {city}.\n"
