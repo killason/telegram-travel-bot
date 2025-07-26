@@ -63,7 +63,7 @@ def handle_city(message: Message):
         bot.send_message(message.chat.id, "❌ Не удалось получить погоду.")
         return
 
-    advice = get_ai_advice(weather["description"])
+    advice = get_ai_advice(weather["condition"])
     
     response = (
         f"📍 Погода в {weather['city']}, {weather['country']}:\n"
