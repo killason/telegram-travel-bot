@@ -30,20 +30,31 @@ def bot_start(message: Message):
 # ⛳ ОБРАБОТКА ГЕОЛОКАЦИИ
 @bot.message_handler(content_types=["location"])
 def handle_location(message: Message):
-    if not message.location:
+    loc = message.location
+    if not loc:
         bot.send_message(message.chat.id, "❗ Геолокация не получена.")
         return
 
-    lat, lon = message.location.latitude, message.location.longitude
+    lat, lon = loc.latitude, loc.longitude
 
     weather = get_weather_by_coordinates(lat, lon)
     if not weather:
         bot.send_message(message.chat.id, "❌ Не удалось получить погоду.")
         return
 
-    advice = get_ai_advice(weather["description"])
-    response = f"🌤️ Погода: {weather['description']}, {weather['temperature']}°C\n\n💡 {advice}"
-    bot.send_message(message.chat.id, response)
+    # Формируем текст погоды
+    weather_text = (
+        f"📍 Погода в {weather['city']}, {weather['country']}:\n"
+        f"🌡 {weather['temperature']}°C (ощущается как {weather['feels_like']}°C)\n"
+        f"🌥 {weather['condition']}\n"
+        f"💨 Ветер: {weather['wind']} км/ч\n"
+        f"💧 Влажность: {weather['humidity']}%"
+    )
+    bot.send_message(message.chat.id, weather_text)
+
+    # Запрашиваем совет у ИИ
+    advice = get_ai_advice(weather["condition"])
+    bot.send_message(message.chat.id, f"💡 Совет:\n{advice}")
 
 
 # ⛳ ОБРАБОТКА ТЕКСТА ГОРОДА
@@ -63,15 +74,14 @@ def handle_city(message: Message):
         bot.send_message(message.chat.id, "❌ Не удалось получить погоду.")
         return
 
-    advice = get_ai_advice(weather["condition"])
-    
-    response = (
+    weather_text = (
         f"📍 Погода в {weather['city']}, {weather['country']}:\n"
-        f"🌡 Температура: {weather['temperature']}°C (ощущается как {weather['feels_like']}°C)\n"
-        f"🌥 Условия: {weather['condition']}\n"
+        f"🌡 {weather['temperature']}°C (ощущается как {weather['feels_like']}°C)\n"
+        f"🌥 {weather['condition']}\n"
         f"💨 Ветер: {weather['wind']} км/ч\n"
-        f"💧 Влажность: {weather['humidity']}%\n\n"
-        f"💡 Совет: {advice}"
+        f"💧 Влажность: {weather['humidity']}%"
     )
-    bot.send_message(message.chat.id, response)
-    
+    bot.send_message(message.chat.id, weather_text)
+
+    advice = get_ai_advice(weather["condition"])
+    bot.send_message(message.chat.id, f"💡 Совет:\n{advice}")
