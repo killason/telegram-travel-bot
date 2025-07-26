@@ -1,45 +1,50 @@
-from services.geo_service import get_coordinates_by_city
-from services.weather_service import get_weather
-from services.advice_service import get_weather_advice
-from telebot import types
 from telebot.types import Message
 from loader import bot
+from services.geo_service import get_coordinates_by_city
+from services.weather_service import get_weather_by_coordinates
+from services.advice_service import get_ai_advice
+
 
 def handle_city_input(city_name: str) -> str:
     coords = get_coordinates_by_city(city_name)
     if not coords:
-        return "⚠️ Не удалось найти координаты для указанного города."
+        return "😔 Не удалось найти город. Попробуй снова."
 
     lat, lon = coords
-    weather_info = get_weather(lat, lon)
-    if not weather_info:
-        return "⚠️ Не удалось получить данные о погоде."
+    weather_info = get_weather_by_coordinates(lat, lon)
+    advice = get_ai_advice(weather_info, city_name)
 
-    condition = weather_info["condition"]
-    temp = weather_info["temp_c"]
-    summary = weather_info["text"]
+    return f"{weather_info}\n\n🧠 {advice}"
 
-    advice = get_weather_advice(city_name, condition, temp)
 
-    return (
-        f"📍 Город: {city_name}\n"
-        f"{summary}\n\n"
-        f"💡 Совет:\n{advice}"
-    )
+def handle_coordinates(lat: float, lon: float) -> str:
+    weather_info = get_weather_by_coordinates(lat, lon)
+    advice = get_ai_advice(weather_info)
+
+    return f"{weather_info}\n\n🧠 {advice}"
+
 
 def process_city_input(message: Message):
     city_name = message.text.strip()
 
-    # Проверка: не выбрал ли он геолокацию вместо текста
     if city_name == "📍 Отправить геолокацию":
         bot.send_message(message.chat.id, "📡 Ожидаю твою геолокацию...")
         return
 
-    bot.send_message(message.chat.id, f"🔎 Ищу погоду и идеи для города: {city_name}")
+    bot.send_message(message.chat.id, f"🔎 Ищу информацию для: {city_name}")
+    result = handle_city_input(city_name)
+    bot.send_message(message.chat.id, result)
+
+
+def process_location_input(message: Message):
+    if not message.location:
+        bot.send_message(message.chat.id, "❗ Не удалось получить координаты.")
+        return
+
+    lat = message.location.latitude
+    lon = message.location.longitude
+    bot.send_message(message.chat.id, f"🔎 Определено местоположение. Анализирую...")
+
+    result = handle_coordinates(lat, lon)
+    bot.send_message(message.chat.id, result)
     
-    # Основной обработчик
-    try:
-        result = handle_city_input(city_name)
-        bot.send_message(message.chat.id, result)
-    except Exception as e:
-        bot.send_message(message.chat.id, f"❌ Ошибка обработки: {e}")

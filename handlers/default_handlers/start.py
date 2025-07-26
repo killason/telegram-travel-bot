@@ -1,7 +1,7 @@
 from telebot import types
 from telebot.types import Message
 from loader import bot
-from handlers.weather_flow import process_city_input
+from handlers.weather_flow import process_city_input, process_location_input
 
 
 @bot.message_handler(commands=["start"])
@@ -27,3 +27,8 @@ def bot_start(message: Message):
 
         # Регистрируем следующий шаг, если пользователь введёт город вручную
     bot.register_next_step_handler(message, process_city_input)
+
+    # Отдельный хендлер на геолокацию
+@bot.message_handler(content_types=["location"])
+def handle_geo(message: Message):
+    process_location_input(message)
