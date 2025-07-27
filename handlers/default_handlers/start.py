@@ -53,7 +53,7 @@ def handle_location(message: Message):
     bot.send_message(message.chat.id, weather_text)
 
     # Запрашиваем совет у ИИ
-    advice = get_ai_advice(weather["condition"])
+    advice = get_ai_advice(weather['city'], weather["condition"], weather['temperature'])
     bot.send_message(message.chat.id, f"💡 Совет:\n{advice}")
 
 
