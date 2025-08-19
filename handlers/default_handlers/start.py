@@ -1,13 +1,17 @@
 from telebot import types
 from telebot.types import Message
 from loader import bot
-from services.geo_service import get_coordinates_by_city
-from services.weather_service import get_weather_by_coordinates
-from services.advice_service import get_ai_advice
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from services.weather_flow_service import process_weather_by_location, process_weather_by_city
+from keyboards.inline.place_categories import get_place_categories_keyboard
+from utils.user_context import set_context
 
 
+# ---------------------ОБРАБОТКА КОМАНДЫ /start---------------------------
 @bot.message_handler(commands=["start"])
 def bot_start(message: Message):
+    """"Обработка команды /start"""
+
     welcome_text = (
         f"👋 Привет, {message.from_user.full_name}! Я — твой Путешественник-Досугатор 🗺️\n\n"
         "Я помогу тебе:\n"
@@ -27,61 +31,42 @@ def bot_start(message: Message):
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup)
 
 
-# ⛳ ОБРАБОТКА ГЕОЛОКАЦИИ
+# ---------------------ОБРАБОТКА ГЕОЛОКАЦИИ---------------------------
 @bot.message_handler(content_types=["location"])
 def handle_location(message: Message):
-    loc = message.location
-    if not loc:
-        bot.send_message(message.chat.id, "❗ Геолокация не получена.")
-        return
+    """"Обработка геолокации пользователя"""
 
-    lat, lon = loc.latitude, loc.longitude
+    lat, lon = message.location.latitude, message.location.longitude
+    set_context(message.from_user.id, lat=lat, lon=lon)
+    user_name = message.from_user.first_name
+    weather_text, advice_text = process_weather_by_location(message.from_user.id, user_name, lat, lon)
 
-    weather = get_weather_by_coordinates(lat, lon)
-    if not weather:
-        bot.send_message(message.chat.id, "❌ Не удалось получить погоду.")
-        return
+    if advice_text:
+        answer = weather_text + "\n" + advice_text
+    else:
+        answer = weather_text + "\n Не удалось получить советы."
 
-    # Формируем текст погоды
-    weather_text = (
-        f"📍 Погода в {weather['city']}, {weather['country']}:\n"
-        f"🌡 {weather['temperature']}°C (ощущается как {weather['feels_like']}°C)\n"
-        f"🌥 {weather['condition']}\n"
-        f"💨 Ветер: {weather['wind']} км/ч\n"
-        f"💧 Влажность: {weather['humidity']}%"
-    )
-    bot.send_message(message.chat.id, weather_text)
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("⬇️", callback_data="back_to_categories"))
+    bot.send_message(message.chat.id, answer, reply_markup=markup)
 
-    # Запрашиваем совет у ИИ
-    advice = get_ai_advice(weather['city'], weather["condition"], weather['temperature'])
-    bot.send_message(message.chat.id, f"💡 Совет:\n{advice}")
-
-
-# ⛳ ОБРАБОТКА ТЕКСТА ГОРОДА
+# ------------ОБРАБОТКА ТЕКСТА ГОРОДА--------------------
 @bot.message_handler(func=lambda msg: msg.text and not msg.text.startswith('/'))
 def handle_city(message: Message):
+    """"Обработка текста с названием города"""
+    
     city = message.text.strip()
+    user_name = message.from_user.first_name
     bot.send_message(message.chat.id, f"🔍 Ищу информацию по городу: {city}")
+    weather_text, advice_text = process_weather_by_city(message.from_user.id, user_name, city)
 
-    coords = get_coordinates_by_city(city)
-    if not coords:
-        bot.send_message(message.chat.id, "❌ Не удалось найти город. Попробуйте снова.")
+    if advice_text:
+        answer = weather_text + "\n" + advice_text
+    else:
+        answer = weather_text + "\n Не удалось получить советы."
+        bot.send_message(message.chat.id, answer)
         return
-
-    lat, lon = coords
-    weather = get_weather_by_coordinates(lat, lon)
-    if not weather:
-        bot.send_message(message.chat.id, "❌ Не удалось получить погоду.")
-        return
-
-    weather_text = (
-        f"📍 Погода в {weather['city']}, {weather['country']}:\n"
-        f"🌡 {weather['temperature']}°C (ощущается как {weather['feels_like']}°C)\n"
-        f"🌥 {weather['condition']}\n"
-        f"💨 Ветер: {weather['wind']} км/ч\n"
-        f"💧 Влажность: {weather['humidity']}%"
-    )
-    bot.send_message(message.chat.id, weather_text)
-
-    advice = get_ai_advice(weather["condition"])
-    bot.send_message(message.chat.id, f"💡 Совет:\n{advice}")
+        
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("⬇️", callback_data="back_to_categories"))
+    bot.send_message(message.chat.id, answer, reply_markup=markup)

@@ -1,8 +1,12 @@
+from telebot import TeleBot
 from telebot.types import BotCommand
-from config_data.config import DEFAULT_COMMANDS
 
 
-def set_default_commands(bot):
-    bot.set_my_commands(
-        [BotCommand(*i) for i in DEFAULT_COMMANDS]
-    )
+def set_default_commands(bot: TeleBot):
+    """"Выставляет команды по умолчанию для бота."""
+    
+    bot.set_my_commands([
+        BotCommand("start", "Запустить бота"),
+        BotCommand("back_to_categories", "Меню категорий"),
+        BotCommand("help", "Вывести справку по командам"),
+    ])
