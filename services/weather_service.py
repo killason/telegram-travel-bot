@@ -3,6 +3,8 @@ from config_data.config import WEATHER_API_KEY
 
 
 def get_weather_by_coordinates(lat: float, lon: float) -> dict | None:
+    """Получение текущей погоды по координатам."""
+
     url = "http://api.weatherapi.com/v1/current.json"
     params = {
         "key": WEATHER_API_KEY,
