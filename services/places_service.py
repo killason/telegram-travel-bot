@@ -4,8 +4,12 @@ import requests
 from config_data.config import GOOGLE_API_KEY
 
 
-def search_all_places(query: str, lat: float, lon: float, place_type: str, radius: int = 5000) -> list[dict]:
-    """Поиск всех мест по запросу с использованием Google Places API."""
+def search_all_places(
+    lat: float, lon: float, place_type: str, radius: int = 2000
+) -> list[dict]:
+    """
+    Поиск всех мест по запросу с использованием Google Places API.
+    """
 
     url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
     all_results = []
@@ -13,19 +17,14 @@ def search_all_places(query: str, lat: float, lon: float, place_type: str, radiu
 
     for _ in range(3):  # Максимум 3 страницы (Google ограничивает)
         if page_token:
-            params = {
-                "key": GOOGLE_API_KEY,
-                "pagetoken": page_token,
-                "language": "ru"
-            }
+            params = {"key": GOOGLE_API_KEY, "pagetoken": page_token, "language": "ru"}
         else:
             params = {
                 "key": GOOGLE_API_KEY,
                 "location": f"{lat},{lon}",
                 "radius": radius,
                 "type": place_type,
-                "keyword": query,
-                "language": "ru"
+                "language": "ru",
             }
 
         try:
@@ -33,7 +32,12 @@ def search_all_places(query: str, lat: float, lon: float, place_type: str, radiu
             data = response.json()
 
             if data.get("status") not in ("OK", "ZERO_RESULTS"):
-                print("Ошибка запроса:", data.get("status"), "|", data.get("error_message"))
+                print(
+                    "Ошибка запроса:",
+                    data.get("status"),
+                    "|",
+                    data.get("error_message"),
+                )
                 break
 
             for item in data.get("results", []):
@@ -46,13 +50,15 @@ def search_all_places(query: str, lat: float, lon: float, place_type: str, radiu
                 lon_str = location.get("lng")
                 maps_link = f"https://www.google.com/maps/search/?api=1&query={lat_str},{lon_str}"
 
-                all_results.append({
-                    "name": name,
-                    "place_type": place_type,
-                    "address": address,
-                    "link": maps_link,
-                    "place_id": item.get("place_id")
-                })
+                all_results.append(
+                    {
+                        "name": name,
+                        "place_type": place_type,
+                        "address": address,
+                        "link": maps_link,
+                        "place_id": item.get("place_id"),
+                    }
+                )
 
             page_token = data.get("next_page_token")
             if not page_token:
@@ -67,16 +73,17 @@ def search_all_places(query: str, lat: float, lon: float, place_type: str, radiu
     return all_results
 
 
-
 def get_place_details(place_id: str) -> dict | None:
-    """Получение подробной информации о месте по его ID с использованием Google Places API."""
-    
+    """
+    Получение подробной информации о месте по его ID с использованием Google Places API.
+    """
+
     url = "https://maps.googleapis.com/maps/api/place/details/json"
     params = {
         "key": GOOGLE_API_KEY,
         "place_id": place_id,
         "language": "ru",
-        "fields": "name,rating,formatted_address,formatted_phone_number,website,opening_hours,photos,types,geometry"
+        "fields": "name,rating,formatted_address,formatted_phone_number,website,opening_hours,photos,types,geometry",
     }
 
     try:
@@ -93,7 +100,11 @@ def get_place_details(place_id: str) -> dict | None:
         lat = location.get("lat")
         lon = location.get("lng")
 
-        maps_link = f"https://www.google.com/maps/search/?api=1&query={lat},{lon}" if lat and lon else ""
+        maps_link = (
+            f"https://www.google.com/maps/search/?api=1&query={lat},{lon}"
+            if lat and lon
+            else ""
+        )
 
         photo_url = ""
         if "photos" in result:
@@ -112,7 +123,7 @@ def get_place_details(place_id: str) -> dict | None:
             "types": result.get("types", []),
             "photo_url": photo_url,
             "opening_hours": result.get("opening_hours", {}).get("weekday_text", []),
-            "maps_link": maps_link
+            "maps_link": maps_link,
         }
 
     except Exception as e:

@@ -2,6 +2,8 @@ from telebot.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardBut
 from loader import bot
 from database.models import FavoritePlace
 
+
+# ---------------------ОБРАБОТКА КНОПКИ ПОКАЗАТЬ ИЗБРАННОЕ---------------------------
 @bot.callback_query_handler(func=lambda call: call.data == "show_favorites")
 def handle_show_favorites(call: CallbackQuery):
     user_id = call.from_user.id
@@ -18,10 +20,16 @@ def handle_show_favorites(call: CallbackQuery):
             f"<b>{fav.name}</b>\n"
             f"📍 {fav.address}\n"
             f"🏷 {fav.place_type.capitalize()}\n"
-            f"<a href=\"{fav.link}\">📍 На карте</a>"
+            f'<a href="{fav.link}">📍 На карте</a>'
         )
 
     markup = InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton("⬅️ Назад", callback_data="back_to_categories"))
 
-    bot.send_message(call.message.chat.id, text, parse_mode="HTML", disable_web_page_preview=True, reply_markup=markup)
+    bot.send_message(
+        call.message.chat.id,
+        text,
+        parse_mode="HTML",
+        disable_web_page_preview=True,
+        reply_markup=markup,
+    )

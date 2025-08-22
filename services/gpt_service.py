@@ -1,14 +1,17 @@
 import os
 import openai
-from datetime import datetime  
+from datetime import datetime
+
 
 client = openai.OpenAI(
-    api_key=os.getenv("GROQ_API_KEY"),
-    base_url="https://api.groq.com/openai/v1"
+    api_key=os.getenv("GROQ_API_KEY"), base_url="https://api.groq.com/openai/v1"
 )
 
+
 def get_ai_advice(city: str, condition: str, temp_c: float, user_name: str) -> str:
-    """Получает совет от AI о том, чем заняться в городе с учетом погоды и времени суток."""
+    """
+    Получает совет от AI о том, чем заняться в городе с учетом погоды и времени суток.
+    """
 
     now = datetime.now()
 
@@ -28,14 +31,14 @@ def get_ai_advice(city: str, condition: str, temp_c: float, user_name: str) -> s
     day_type = "выходной" if weekday >= 5 else "будний день"
 
     prompt = (
-        f"Ты — дружелюбный помощник по досугу. Отвечаешь на русском языке.\n"
-        f"Пользователя зовут {user_name}.\n"
-        f"Сейчас пользователь находится в городе {city}.\n"
+        f"Меня зовут {user_name}, сейчас нахожусь в городе {city}\n"
+        f"Ты дружелюбный местный, стопроцентов русскоговорящий.\n"
         f"Погода: {condition}, температура: {temp_c}°C.\n"
-        f"Время суток: {time_of_day}, день недели: {day_type}.\n"
-        f"Предложи 1-2 интересных и полезных идеи, чем заняться, исходя из этих условий."
-        f"Ответ должен быть кратким, живым и неформальным, с эмодзи, подходящими к каждому совету. "
-        f"Давай реальные советы связанные с реальными местами и достопримечательностями в этом городе.\n"
+        f"Сейчас {time_of_day} часов, день недели: {day_type}.\n"
+        f"Предложи 1-2 интересных и полезных идеи, чем заняться, исходя из этих условий.\n"
+        f"Ответ должен быть максимально кратким, живым и неформальным, с эмодзи, подходящими к каждому совету.\n"
+        f"Давай реальные советы связанные с реальными местами отдыха, развлечения, культуры и"
+        f" достопримечательностями в этом городе и\или его окрестностях, регионе.\n"
     )
 
     try:
@@ -47,4 +50,3 @@ def get_ai_advice(city: str, condition: str, temp_c: float, user_name: str) -> s
         return response.choices[0].message.content.strip()
     except Exception as e:
         return f"Ошибка при получении совета: {e}"
-    

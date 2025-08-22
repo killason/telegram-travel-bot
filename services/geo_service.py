@@ -3,14 +3,12 @@ from config_data.config import GOOGLE_API_KEY
 
 
 def get_coordinates_by_city(city_name: str) -> tuple[float, float] | None:
-    """Возвращает координаты города по его названию."""
-    
+    """
+    Возвращает координаты города по его названию.
+    """
+
     url = "https://maps.googleapis.com/maps/api/geocode/json"
-    params = {
-        "address": city_name,
-        "key": GOOGLE_API_KEY,
-        "language": "ru"
-    }
+    params = {"address": city_name, "key": GOOGLE_API_KEY, "language": "ru"}
 
     response = requests.get(url, params=params)
 
