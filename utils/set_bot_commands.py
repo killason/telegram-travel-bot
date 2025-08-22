@@ -3,10 +3,13 @@ from telebot.types import BotCommand
 
 
 def set_default_commands(bot: TeleBot):
-    """"Выставляет команды по умолчанию для бота."""
-    
-    bot.set_my_commands([
-        BotCommand("start", "Запустить бота"),
-        BotCommand("back_to_categories", "Меню категорий"),
-        BotCommand("help", "Вывести справку по командам"),
-    ])
+    """ "
+    Выставляет команды по умолчанию для бота.
+    """
+
+    bot.set_my_commands(
+        [
+            BotCommand("start", "Запустить бота"),
+            BotCommand("help", "Вывести справку по командам"),
+        ]
+    )

@@ -1,92 +1,146 @@
-# final-project-telegram-bot
+# Гид по досугу и развлечениям — Telegram Bot
 
+Интеллектуальный Telegram-бот, который помогает пользователю организовать досуг в городе:  
+- показывает актуальную погоду  
+- предлагает варианты досуга и активностей 
+- находит рестораны, кафе, музеи и другие места 
+- сохраняет историю и избранное  
 
+---
 
-## Getting started
+## Возможности
+- Определение местоположения (по геолокации или введённому городу)
+- Получение прогноза погоды (WeatherAPI)
+- Поиск мест через Google Places API
+- Советы по досугу с помощью AI (Groq LLaMA 3 через OpenAI SDK)
+- Сохранение истории советов и избранных мест в базе SQLite
+- Управление через удобные inline-кнопки (Подробнее, Далее, Назад, Добавить в избранное)
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+---
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## Стек технологий
+- **Python** ≥ 3.10 (рекомендуется 3.11)
+- [PyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI) — работа с Telegram Bot API
+- [Requests](https://docs.python-requests.org/) — HTTP-запросы
+- [Peewee ORM](http://docs.peewee-orm.com/) — база данных SQLite
+- [python-dotenv](https://pypi.org/project/python-dotenv/) — загрузка переменных окружения
+- [OpenAI SDK](https://pypi.org/project/openai/) — доступ к Groq (модель LLaMA 3)
 
-## Add your files
+---
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## Установка и запуск
 
+### 1. Клонируйте репозиторий
+```bash
+git clone <repo-url>
+cd TelegramBot
 ```
-cd existing_repo
-git remote add origin https://gitlab.skillbox.ru/vladimir_uspenskii_1/final-project-telegram-bot.git
-git branch -M master
-git push -uf origin master
+
+### 2. Создайте виртуальное окружение
+```bash
+python -m venv .venv
+# Windows:
+.\.venv\Scripts\activate
+# Linux/Mac:
+source .venv/bin/activate
 ```
 
-## Integrate with your tools
+### 3. Установите зависимости
+```bash
+pip install -r requirements.txt
+```
 
-- [ ] [Set up project integrations](https://gitlab.skillbox.ru/vladimir_uspenskii_1/final-project-telegram-bot/-/settings/integrations)
+### 4. Настройте переменные окружения
+Скопируйте шаблон `.env`:
+```bash
+cp .env.template .env
+```
 
-## Collaborate with your team
+Заполните поля в `.env`:
+```ini
+BOT_TOKEN=ваш_токен_бота
+WEATHER_API_KEY=ваш_api_ключ_WeatherAPI
+GOOGLE_API_KEY=ваш_api_ключ_Google
+GROQ_API_KEY=ваш_api_ключ_Groq
+```
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+### 5. Подготовьте базу данных
+```bash
+cd database
+python db_init.py
+cd ..
+```
 
-## Test and Deploy
+### 6. Запустите бота
+```bash
+python main.py
+```
 
-Use the built-in continuous integration in GitLab.
+Бот будет работать в режиме **polling** (бесконечный цикл опроса Telegram).
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+---
 
-***
+## Команды
+- `/start` — начало работы, выбор местоположения
+- `/help` — справка
 
-# Editing this README
+---
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+## Структура проекта
+```
+TelegramBot/
+  config_data/        # конфигурация (.env и настройки)
+  database/           # ORM Peewee, миграции и инициализация SQLite
+  handlers/           # обработчики команд и колбэков
+  keyboards/          # inline-кнопки и клавиатуры
+  services/           # модули интеграций (погода, Google Places, AI)
+  utils/              # вспомогательные функции (user_context, команды)
+  loader.py           # инициализация TeleBot и state storage
+  main.py             # точка входа (polling)
+  requirements.txt    # зависимости
+  .env.template       # шаблон переменных окружения
+  README.md           # документация
+```
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+---
 
-## Name
-Choose a self-explaining name for your project.
+## Переменные окружения
+- `BOT_TOKEN` — токен Telegram-бота (от @BotFather)
+- `WEATHER_API_KEY` — ключ [WeatherAPI](https://www.weatherapi.com/)
+- `GOOGLE_API_KEY` — ключ Google (Geocoding + Places API)
+- `GROQ_API_KEY` — ключ [Groq](https://console.groq.com/keys)
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+---
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+## База данных
+- Используется SQLite (файл `bot_data.db`)
+- ORM: Peewee
+- Основные таблицы:
+  - `UserHistory` — история действий
+  - `Favorites` — избранное пользователя
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+---
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+## AI-интеграция
+Используется [OpenAI SDK](https://github.com/openai/openai-python) с кастомным `base_url=https://api.groq.com/openai/v1` для работы с моделью `llama3-70b-8192`.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+Пример вызова:
+```python
+client = OpenAI(api_key=GROQ_API_KEY, base_url="https://api.groq.com/openai/v1")
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+---
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+## TODO / Roadmap
+- [ ] Добавить удаление избранного (выборочно)
+- [ ] Перейти на вебхуки (для деплоя на сервер)
+- [ ] Добавить мультиязычность
+- [ ] Расширить поддержку API (отели, маршруты)
+- [ ] Расширить поиск мест по ключевым словам
+- [ ] Добавить сортировку мест (по рейтингу, расстоянию)
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+---
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## 📜 Лицензия
+MIT License
+Copyright (c) 2025 Владимир Успенский (Skillbox Final Project)

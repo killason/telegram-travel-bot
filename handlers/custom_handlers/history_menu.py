@@ -1,8 +1,15 @@
 from telebot.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from loader import bot
-from services.history_service import get_months_with_data, get_history_by_month, delete_history_by_month, RU_MONTHS
+from services.history_service import (
+    get_months_with_data,
+    get_history_by_month,
+    delete_history_by_month,
+    RU_MONTHS,
+)
 
-@bot.callback_query_handler(func=lambda call: call.data == "category_history")
+
+# ---------------------ОБРАБОТКА ИСТОРИИ---------------------------
+@bot.callback_query_handler(func=lambda call: call.data == "show_history")
 def handle_history_root(call: CallbackQuery):
     user_id = call.from_user.id
     months = get_months_with_data(user_id)
@@ -16,12 +23,16 @@ def handle_history_root(call: CallbackQuery):
     buttons = []
     for year, month, cnt in months:
         label = f"{RU_MONTHS[month]} {year} ({cnt})"
-        buttons.append(InlineKeyboardButton(label, callback_data=f"hist_month:{year}-{month:02d}"))
+        buttons.append(
+            InlineKeyboardButton(label, callback_data=f"hist_month:{year}-{month:02d}")
+        )
     kb.add(*buttons)
     kb.add(InlineKeyboardButton("⬅️ Назад", callback_data="back_to_categories"))
 
     bot.send_message(call.message.chat.id, "Выбери месяц:", reply_markup=kb)
 
+
+# ---------------------ОБРАБОТКА ВЫБОРА МЕСЯЦА---------------------------
 @bot.callback_query_handler(func=lambda call: call.data.startswith("hist_month:"))
 def handle_history_month(call: CallbackQuery):
     _, ym = call.data.split(":")
@@ -37,7 +48,7 @@ def handle_history_month(call: CallbackQuery):
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
             text="Записей нет.",
-            reply_markup=kb
+            reply_markup=kb,
         )
         return
 
@@ -63,8 +74,10 @@ def handle_history_month(call: CallbackQuery):
 
     kb = InlineKeyboardMarkup()
     kb.add(
-        InlineKeyboardButton("🗑 Удалить этот месяц", callback_data=f"hist_del:{year}-{month:02d}"),
-        InlineKeyboardButton("⬅️ Назад", callback_data="category_history")
+        InlineKeyboardButton(
+            "🗑 Удалить этот месяц", callback_data=f"hist_del:{year}-{month:02d}"
+        ),
+        InlineKeyboardButton("⬅️ Назад", callback_data="show_history"),
     )
     # редактируем текущее сообщение (без спама новыми)
     bot.edit_message_text(
@@ -72,9 +85,11 @@ def handle_history_month(call: CallbackQuery):
         message_id=call.message.message_id,
         text=text,
         parse_mode="HTML",
-        reply_markup=kb
+        reply_markup=kb,
     )
 
+
+# ---------------------ОБРАБОТКА УДАЛЕНИЯ МЕСЯЦА---------------------------
 @bot.callback_query_handler(func=lambda call: call.data.startswith("hist_del:"))
 def handle_history_delete_month(call: CallbackQuery):
     _, ym = call.data.split(":")
@@ -98,7 +113,9 @@ def handle_history_delete_month(call: CallbackQuery):
         buttons = []
         for y, m, cnt in months:
             label = f"{RU_MONTHS[m]} {y} ({cnt})"
-            buttons.append(InlineKeyboardButton(label, callback_data=f"hist_month:{y}-{m:02d}"))
+            buttons.append(
+                InlineKeyboardButton(label, callback_data=f"hist_month:{y}-{m:02d}")
+            )
         kb.add(*buttons)
         kb.add(InlineKeyboardButton("⬅️ Назад", callback_data="back_to_categories"))
         bot.send_message(chat_id, "Выбери месяц:", reply_markup=kb)
@@ -106,4 +123,3 @@ def handle_history_delete_month(call: CallbackQuery):
         kb = InlineKeyboardMarkup()
         kb.add(InlineKeyboardButton("⬅️ Назад", callback_data="back_to_categories"))
         bot.send_message(chat_id, "История пуста.", reply_markup=kb)
-
