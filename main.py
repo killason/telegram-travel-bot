@@ -1,14 +1,13 @@
-from loader import bot
+import os
 import handlers
 from utils.set_bot_commands import set_default_commands
 import logging
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s | %(levelname)s | — %(message)s"
-)
-logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
-    set_default_commands(bot)
-    logger.info("Бот запущен...")
-    bot.infinity_polling()
+    if os.getenv("RUN_MODE", "polling") == "polling":
+        from loader import bot
+
+        set_default_commands(bot)
+        logging.info("Бот запущен...")
+        bot.infinity_polling(skip_pending=True, timeout=20)
