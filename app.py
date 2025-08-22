@@ -10,6 +10,10 @@ WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "")  # опционально
 app = Flask(__name__)
 
 
+@app.get("/")
+def root():
+    return "ok", 200
+
 @app.get("/health")
 def health():
     return "ok", 200
