@@ -27,14 +27,14 @@ def send_places_chunk(chat_id: int, user_id: int, place_type: str) -> None:
     for idx, place in enumerate(chunk):
         name = place["name"] or "Без названия"
         address = place["address"]
-        place_type = place["place_type"].capitalize()
+        place_type_label = place["place_type"].capitalize()
         link = place["link"]
         place_id = place["place_id"]
 
         text = (
             f"<b>{name}</b>\n"
             f"📍 {address}\n"
-            f"🏷 {place_type}\n"
+            f"🏷 {place_type_label}\n"
             f'<a href="{link}">📍 На карте</a>'
         )
 
@@ -60,7 +60,7 @@ def send_places_chunk(chat_id: int, user_id: int, place_type: str) -> None:
             if not is_last_in_list:
                 buttons.append(
                     InlineKeyboardButton(
-                        "➡️ Далее", callback_data="more_places:{place_type}"
+                        "➡️ Далее", callback_data=f"more_places:{place_type}"
                     )
                 )
             buttons.append(
