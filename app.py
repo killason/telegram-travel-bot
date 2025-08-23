@@ -35,6 +35,13 @@ _import_all_handlers()  # <-- ВАЖНО: регистрирует все дек
 
 app = Flask(__name__)
 
+@bot.message_handler(commands=["ping"])
+def _tmp_ping(m):
+    try:
+        bot.reply_to(m, "pong ✅ (render)")
+    except Exception as e:
+        logging.exception("send failed: %s", e)
+
 @app.get("/")
 def root():
     return "service up", 200
