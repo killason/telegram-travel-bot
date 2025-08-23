@@ -5,7 +5,7 @@ from utils.place_output import send_places_chunk
 
 
 # ---------------------ОБРАБОТКА КНОПКИ "ДАЛЕЕ"---------------------------
-@bot.callback_query_handler(func=lambda call: call.data.startswith("more_places"))
+@bot.callback_query_handler(func=lambda call: call.data.startswith("more_places:"))
 def handle_more_places(call: CallbackQuery):
     """ "Обработчик для кнопки 'Ещё места'."""
     user_id = call.from_user.id
@@ -21,7 +21,7 @@ def handle_more_places(call: CallbackQuery):
     # Проверяем кэш по этой категории (чтобы не листать пустое)
     places = get_cached_places(user_id, place_type=place_type) or []
     if not places:
-        bot.send_message(call.message.chat.id, "❗ Пусто. Выбери категорию снова.", callback_data="back_to_categories")
+        bot.send_message(call.message.chat.id, "❗ Пусто. Выбери категорию снова.")
         return
 
     send_places_chunk(
