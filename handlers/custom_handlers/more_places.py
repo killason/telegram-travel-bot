@@ -21,7 +21,7 @@ def handle_more_places(call: CallbackQuery):
     # Проверяем кэш по этой категории (чтобы не листать пустое)
     places = get_cached_places(user_id, place_type=place_type) or []
     if not places:
-        bot.send_message(call.message.chat.id, "❗ Пусто. Выбери категорию снова.")
+        bot.send_message(call.message.chat.id, "❗ Пусто. Выбери категорию снова.", callback_data="back_to_categories")
         return
 
     send_places_chunk(
