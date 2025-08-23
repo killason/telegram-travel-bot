@@ -1,24 +1,37 @@
-# app.py
 import os
 import logging
 from flask import Flask, request, abort
 from telebot.types import Update
 from loader import bot
+import importlib
+import pkgutil
 
-# Логи Flask + TeleBot
+
 logging.basicConfig(level=logging.INFO)
 telebot_logger = logging.getLogger("telebot")
 telebot_logger.setLevel(logging.INFO)
 
 WEBHOOK_PATH = os.getenv("WEBHOOK_PATH", "/telegram/webhook")
-WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "")  # можно не задавать
+WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "")
 
-# ВАЖНО: импортируем хэндлеры, чтобы они зарегистрировались декораторами
-try:
-    import handlers  # noqa: F401
-    logging.info("Handlers imported successfully")
-except Exception:
-    logging.exception("Handlers import failed")
+
+def _import_all_handlers():
+    try:
+        import handlers as _handlers_pkg  # сам пакет
+    except Exception:
+        logging.exception("Cannot import 'handlers' package")
+        return
+
+    # Импортируем каждый .py в каталоге handlers/
+    for m in pkgutil.iter_modules(_handlers_pkg.__path__):
+        mod_name = f"{_handlers_pkg.__name__}.{m.name}"
+        try:
+            importlib.import_module(mod_name)
+            logging.info("Handler module loaded: %s", mod_name)
+        except Exception:
+            logging.exception("Failed to load handler module: %s", mod_name)
+
+_import_all_handlers()  # <-- ВАЖНО: регистрирует все декораторы
 
 app = Flask(__name__)
 
