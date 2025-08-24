@@ -36,7 +36,7 @@ def send_places_chunk(chat_id: int, user_id: int, place_type: str) -> None:
             f"📍 {address}\n"
             f"🏷 {place_type_label}\n"
             f'<a href="{link}">📍 На карте</a>\n'
-            f'<a href="tg://"> подробнее...</a>'
+            f'<a href="https://t.me/your_bot?start=details_{place_id}">Подробнее</a>'
         )
 
         markup = InlineKeyboardMarkup()
@@ -50,11 +50,11 @@ def send_places_chunk(chat_id: int, user_id: int, place_type: str) -> None:
         if is_last_in_list:
             suffix = "final"
 
-        markup.add(
-            InlineKeyboardButton(
-                text, callback_data=f"details_{place_id}_{suffix}"
-            )
-        )
+        # markup.add(
+        #     InlineKeyboardButton(
+        #         "", callback_data=f"details_{place_id}_{suffix}"
+        #     )
+        # )
 
         if is_last_in_chunk:
             buttons = []
@@ -71,7 +71,7 @@ def send_places_chunk(chat_id: int, user_id: int, place_type: str) -> None:
 
         bot.send_message(
             chat_id,
-            "Выберите вариант ниже:",
+            text,
             parse_mode="HTML",
             disable_web_page_preview=True,
             reply_markup=markup,
