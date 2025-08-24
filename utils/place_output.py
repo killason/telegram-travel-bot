@@ -71,7 +71,7 @@ def send_places_chunk(chat_id: int, user_id: int, place_type: str) -> None:
 
         bot.send_message(
             chat_id,
-            " ",
+            "Выберите вариант ниже:",
             parse_mode="HTML",
             disable_web_page_preview=True,
             reply_markup=markup,
