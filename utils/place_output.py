@@ -35,7 +35,8 @@ def send_places_chunk(chat_id: int, user_id: int, place_type: str) -> None:
             f"<b>{name}</b>\n"
             f"📍 {address}\n"
             f"🏷 {place_type_label}\n"
-            f'<a href="{link}">📍 На карте</a>'
+            f'<a href="{link}">📍 На карте</a>\n'
+            f'<a href="tg://"> подробнее...</a>'
         )
 
         markup = InlineKeyboardMarkup()
@@ -51,7 +52,7 @@ def send_places_chunk(chat_id: int, user_id: int, place_type: str) -> None:
 
         markup.add(
             InlineKeyboardButton(
-                "🔎 Подробнее", callback_data=f"details_{place_id}_{suffix}"
+                text, callback_data=f"details_{place_id}_{suffix}"
             )
         )
 
@@ -70,7 +71,7 @@ def send_places_chunk(chat_id: int, user_id: int, place_type: str) -> None:
 
         bot.send_message(
             chat_id,
-            text,
+            #
             parse_mode="HTML",
             disable_web_page_preview=True,
             reply_markup=markup,
